@@ -1,0 +1,223 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      #myCanvas {
+        margin: 100px;
+        padding: 10px;
+        border:  1px solid #000 ;
+      }
+    </style>
+  </head>
+  <body>
+    <form>
+      <input id ="sides">Enter No. of sides </input>
+      <br>
+      <input id ="intervals">Enter No. of intervals </input>
+            <br>
+
+      <input id ="radius">Enter size of inner polygon  </input> 
+            <br>
+
+      <input id ="size">Enter size. of outer polygon </input>
+            <br>
+            <button type="submit" onclick=" start(); return false; " >Generate </button>
+
+    </form>
+
+    </form>
+    <canvas id="myCanvas" width="1000" height="800"></canvas>
+    <script>
+
+      function start()
+      {
+         var canvas = document.getElementById('myCanvas');
+         canvas.width = canvas.width;
+      var context = canvas.getContext('2d');
+
+      context.beginPath();
+      var x =  canvas.width / 2.0 ;  var y = canvas.height / 2.0 ;
+
+
+      context.moveTo(x, y);
+
+      var radius = document.getElementById("radius").value != "" ? document.getElementById("radius").value : 50 ; 
+
+      var size = document.getElementById("size").value != "" ? document.getElementById("size").value : 300 ; 
+
+      
+      var angle = 0  ;
+      var sides = document.getElementById("sides").value != "" ? document.getElementById("sides").value : 10 ; 
+
+      var sumAngle = angle ;
+      var sumDistance = 0;
+      var alpha =  360/sides * Math.PI/ 180;
+      var intervals = document.getElementById("intervals").value != "" ? document.getElementById("intervals").value : 20 ; 
+
+      var intervalSize = size - radius ;
+      intervalSize = intervalSize / intervals ;
+
+      var joinLineSize = 2 * size * Math.sin(alpha/2);
+      var joinLineIntervalSize = joinLineSize/intervals;
+
+
+
+
+
+        for( var i =0 ; i < sides ; i++)
+        {
+
+          
+
+          
+
+          var x1 = x + radius * Math.cos(angle);   // Sets the points for smaller polygon
+          var y1 = y + radius * Math.sin(angle);
+
+
+          var x2 = x + size * Math.cos(angle);   // Sets points for bigger polygon
+          var y2 = y + size * Math.sin(angle);
+
+        
+         
+
+          var x3 = x + radius * Math.cos( angle + alpha) ; // Connects smaller polygon , next Point
+          var y3 = y + radius * Math.sin( angle + alpha) ;
+
+
+          var x4 = x + size * Math.cos( angle + alpha) ;  // Connects the bigger polygon, next point
+          var y4 = y + size * Math.sin( angle + alpha) ;
+
+          
+
+          var curSlope = Math.tan(angle ); // Slope of the current line
+          var cosThetaCurSlope = 1 / Math.sqrt(1 + curSlope * curSlope); // Value of cos A , given value of Tan A
+          var sinThetaCurSlope = cosThetaCurSlope * curSlope ; // Value of Sin A, given value of Tan A
+
+
+          var nextSlope = Math.tan(angle + alpha); // Slope of the next line 
+          var cosThetaNextSlope= 1 / Math.sqrt(1 + nextSlope * nextSlope); // Value of cos A , given value of Tan A
+          var sinThetaNextSlope = cosThetaNextSlope * nextSlope ; // Value of Sin A, given value of Tan A
+
+
+
+
+          var joinLineSlope = (y4-y2) / (x4-x2);
+          var cosThetaJoinSlope= 1 / Math.sqrt(1 + joinLineSlope * joinLineSlope);
+          var sinThetaJoinSlope = cosThetaJoinSlope* joinLineSlope ;
+
+          sumDistance = 0  ;
+          var correctionCurrent  =0 ;
+          var currectionNext = 0 ;
+          var correctionJoin = 1;
+
+          for( var j = 0 ; j < intervals ;  j++)
+              {
+                sumDistance = sumDistance + intervalSize ;
+                
+                
+                if( sumAngle <= 90 || sumAngle > 270)
+                  correctionCurrent = -1 ;
+                else
+                  correctionCurrent = 1 ;
+
+                if( ((sumAngle + 360/sides) <=90 ) || ( (sumAngle+ 360/sides) > 270 )   )  
+                  currectionNext = -1 ;
+                else
+                  currectionNext = 1 ;
+
+                if( sumAngle < 180 )
+                  correctionJoin = 1 ;
+                else
+                  correctionJoin = -1 ;
+              
+
+                if(sumAngle + 360/sides ==90)
+                   {
+                    cosThetaNextSlope = 0;
+                    sinThetaNextSlope = 1 ;
+                   }
+                  if(sumAngle == 90)
+                   {
+                    cosThetaCurSlope = 0;
+                    sinThetaCurSlope = 1 ;
+                   }
+                   if(x4-x2 == 0)
+                   {
+                    cosThetaJoinSlope = 0;
+                    sinThetaJoinSlope = 1;
+                   }
+                
+
+               
+
+                    var x5 = x1 - correctionCurrent*sumDistance*cosThetaCurSlope ;
+                    var y5 = y1 - correctionCurrent*sumDistance*sinThetaCurSlope ;
+
+                    //a = (sumAngle+alpha)/180 > 1 ? 1:-1 ;
+
+
+                    var x6 =  x3 - currectionNext*sumDistance*cosThetaNextSlope ;
+                    var y6 =  y3 - currectionNext*sumDistance*sinThetaNextSlope ;
+
+                                    
+                    
+
+                    var x7 =  x4  + correctionJoin*joinLineIntervalSize*j*cosThetaJoinSlope ;
+                    var y7 =  y4  + correctionJoin*joinLineIntervalSize*j*sinThetaJoinSlope ;
+
+
+                    var x8 =  x4  + correctionJoin*joinLineIntervalSize*(intervals-j)*cosThetaJoinSlope ;
+                    var y8 =  y4  + correctionJoin*joinLineIntervalSize*(intervals-j)*sinThetaJoinSlope ;
+                    
+                   
+                    
+                      context.moveTo(x5,y5);
+                      context.lineTo(x8,y8);
+                     
+                     context.moveTo(x6,y6);
+                      context.lineTo(x7,y7);
+                     
+                   
+                    
+                
+
+              }
+
+
+
+          context.moveTo(x1,y1);                  
+
+          context.lineTo(x3,y3);
+          context.moveTo(x1,y1);
+
+
+          context.lineTo(x2,y2);
+          context.moveTo(x2,y2);
+
+          context.lineTo(x4,y4);
+
+
+          context.moveTo(x5,y5);
+         // context.lineTo(x6,y6);
+
+
+
+
+
+          context.moveTo(x,y);
+          sumAngle += 360/sides ;
+          angle = sumAngle*Math.PI/180 ;
+
+        }
+              context.stroke();
+              return true ;
+
+      }
+
+     
+
+
+    </script>
+  </body>
+</html>    
